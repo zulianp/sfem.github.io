@@ -5,23 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="SFEM documentation, usage notes, and workflow examples."
+      content="SFEM simulation workflows, benchmarks, and technical notes."
     />
-    <title>SFEM Documentation</title>
+    <title>SFEM Workflows</title>
     <style>
       :root {
         color-scheme: light;
-        --ink: #1d2430;
-        --muted: #5d6878;
-        --line: #d9e0e8;
-        --accent: #0b6bcb;
-        --accent-strong: #084f95;
-        --surface: #f7f9fc;
-        --white: #ffffff;
+        --ink: #181a1f;
+        --muted: #5f6670;
+        --line: #dfe3e6;
+        --paper: #ffffff;
+        --surface: #f6f7f8;
+        --accent: #2c6b73;
+        --accent-soft: #dbe9eb;
+        --warm: #8b5e4d;
       }
 
       * {
         box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
       }
 
       body {
@@ -31,101 +36,245 @@
           Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
           "Segoe UI", sans-serif;
         color: var(--ink);
-        background:
-          linear-gradient(135deg, rgba(11, 107, 203, 0.08), transparent 32rem),
-          var(--surface);
+        background: var(--surface);
       }
 
-      main {
-        width: min(1040px, calc(100% - 40px));
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        width: min(1120px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 72px 0 48px;
       }
 
-      .eyebrow {
-        display: inline-flex;
+      header {
+        display: flex;
         align-items: center;
-        min-height: 32px;
-        padding: 0 12px;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 28px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--ink);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .mark {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
         border: 1px solid var(--line);
-        border-radius: 999px;
-        color: var(--accent-strong);
-        background: var(--white);
+        border-radius: 8px;
+        color: var(--accent);
+        background: var(--paper);
+        font-weight: 900;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      nav a {
+        padding: 9px 11px;
+        border-radius: 8px;
+        color: var(--muted);
         font-size: 14px;
         font-weight: 700;
+        text-decoration: none;
+      }
+
+      nav a:hover,
+      nav a:focus-visible {
+        color: var(--ink);
+        background: var(--paper);
+        outline: none;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+        gap: 56px;
+        align-items: center;
+        padding: 72px 0 88px;
+      }
+
+      .status {
+        display: inline-flex;
+        min-height: 30px;
+        align-items: center;
+        padding: 0 11px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        background: var(--paper);
+        font-size: 13px;
+        font-weight: 800;
       }
 
       h1 {
-        max-width: 840px;
-        margin: 28px 0 18px;
-        font-size: clamp(44px, 8vw, 86px);
+        max-width: 740px;
+        margin: 24px 0 18px;
+        font-size: clamp(44px, 7vw, 82px);
         line-height: 0.98;
         letter-spacing: 0;
       }
 
-      .intro {
-        max-width: 720px;
+      .lead {
+        max-width: 650px;
         margin: 0;
         color: var(--muted);
         font-size: clamp(18px, 2vw, 22px);
-        line-height: 1.55;
+        line-height: 1.5;
       }
 
       .actions {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
-        margin-top: 32px;
+        margin-top: 30px;
       }
 
       .button {
         display: inline-flex;
+        min-height: 44px;
         align-items: center;
         justify-content: center;
-        min-height: 44px;
-        padding: 0 18px;
-        border: 1px solid var(--accent);
+        padding: 0 16px;
+        border: 1px solid var(--ink);
         border-radius: 8px;
-        color: var(--white);
-        background: var(--accent);
-        font-weight: 700;
+        color: #ffffff;
+        background: var(--ink);
+        font-weight: 800;
         text-decoration: none;
       }
 
       .button.secondary {
-        color: var(--accent-strong);
-        background: var(--white);
+        border-color: var(--line);
+        color: var(--ink);
+        background: var(--paper);
+      }
+
+      .workflow-panel {
+        display: grid;
+        align-content: start;
+        gap: 12px;
+        margin: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--paper);
+      }
+
+      .workflow-links {
+        display: grid;
+        gap: 8px;
+        padding: 20px;
+      }
+
+      .workflow-links span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .workflow-links strong {
+        font-size: 18px;
+      }
+
+      .workflow-links a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0 0;
+        border-top: 1px solid var(--line);
+        color: var(--ink);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .workflow-links a::after {
+        content: "->";
+        color: var(--accent);
+      }
+
+      .workflow-links a:hover,
+      .workflow-links a:focus-visible {
+        color: var(--accent);
+        outline: none;
       }
 
       section {
-        margin-top: 72px;
-        padding-top: 28px;
+        padding: 58px 0;
         border-top: 1px solid var(--line);
       }
 
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.55fr) minmax(0, 0.45fr);
+        gap: 40px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
       h2 {
-        margin: 0 0 20px;
-        font-size: 24px;
+        margin: 0;
+        font-size: clamp(30px, 4vw, 48px);
+        line-height: 1.05;
         letter-spacing: 0;
+      }
+
+      .section-head p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
       }
 
       .grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
+        gap: 14px;
       }
 
       .item {
-        min-height: 150px;
+        min-height: 168px;
         padding: 20px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: var(--white);
+        background: var(--paper);
+      }
+
+      .item::before {
+        content: "";
+        display: block;
+        width: 34px;
+        height: 3px;
+        margin-bottom: 20px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .item:nth-child(2)::before {
+        background: var(--warm);
+      }
+
+      .item:nth-child(3)::before {
+        background: #6f7480;
       }
 
       .item h3 {
         margin: 0 0 10px;
-        font-size: 18px;
+        font-size: 19px;
         letter-spacing: 0;
       }
 
@@ -135,60 +284,174 @@
         line-height: 1.55;
       }
 
+      .list {
+        display: grid;
+        gap: 0;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--line);
+      }
+
+      .list li {
+        display: grid;
+        grid-template-columns: 130px minmax(0, 1fr);
+        gap: 18px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .list strong {
+        color: var(--accent);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .list span {
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
       footer {
-        margin-top: 72px;
+        padding: 32px 0 42px;
+        border-top: 1px solid var(--line);
         color: var(--muted);
         font-size: 14px;
       }
 
-      @media (max-width: 760px) {
-        main {
-          width: min(100% - 28px, 1040px);
-          padding-top: 44px;
+      @media (max-width: 860px) {
+        .hero,
+        .section-head {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding-top: 36px;
         }
 
         .grid {
           grid-template-columns: 1fr;
         }
       }
+
+      @media (max-width: 620px) {
+        .shell {
+          width: min(100% - 28px, 1120px);
+        }
+
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        nav {
+          justify-content: flex-start;
+        }
+
+        .list li {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+      }
     </style>
   </head>
   <body>
+    <header class="shell">
+      <a class="brand" href="/" aria-label="SFEM home">
+        <span class="mark">S</span>
+        <span>SFEM</span>
+      </a>
+      <nav aria-label="Site sections">
+        <a href="#scope">Scope</a>
+        <a href="#planned">Planned</a>
+        <a href="https://github.com/zulianp/sfem">Repository</a>
+      </nav>
+    </header>
+
     <main>
-      <span class="eyebrow">Work in progress</span>
-      <h1>SFEM documentation</h1>
-      <p class="intro">
-        This page will collect practical notes for building, running, and
-        extending SFEM, including common workflows, examples, and development
-        references.
-      </p>
+      <section class="hero shell" aria-labelledby="page-title">
+        <div>
+          <span class="status">Work in progress</span>
+          <h1 id="page-title">SFEM workflows</h1>
+          <p class="lead">
+            Notes for simulation workflows, benchmarks, and technical aspects of
+            SFEM.
+          </p>
+          <div class="actions" aria-label="Primary links">
+            <a class="button" href="#scope">Scope</a>
+            <a class="button secondary" href="https://github.com/zulianp/sfem">
+              Repository
+            </a>
+          </div>
+        </div>
 
-      <div class="actions" aria-label="Primary links">
-        <a class="button" href="https://github.com/zulianp/sfem">GitHub repository</a>
-        <a class="button secondary" href="#planned-docs">Planned documentation</a>
-      </div>
+        <aside class="workflow-panel" aria-label="Available workflows">
+          <div class="workflow-links">
+            <strong>Workflows</strong>
+            <span>Available cases</span>
+            <a href="workflows/mooney_rivlin_kelvin_voigt_newmark/">
+              Mooney-Rivlin Kelvin-Voigt Newmark
+            </a>
+          </div>
+        </aside>
+      </section>
 
-      <section id="planned-docs" aria-labelledby="planned-docs-title">
-        <h2 id="planned-docs-title">Planned documentation</h2>
-        <div class="grid">
-          <article class="item">
-            <h3>Getting started</h3>
-            <p>Installation notes, required tools, build options, and first runs.</p>
-          </article>
-          <article class="item">
-            <h3>Workflows</h3>
-            <p>Mesh preparation, operators, solvers, contact, GPU runs, and validation.</p>
-          </article>
-          <article class="item">
-            <h3>Development</h3>
-            <p>Code organization, testing, performance notes, and contribution guidance.</p>
-          </article>
+      <section id="scope">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Scope</h2>
+            <p>
+              This site is not intended as API documentation. It is for
+              reproducible simulation material.
+            </p>
+          </div>
+
+          <div class="grid">
+            <article class="item">
+              <h3>Workflows</h3>
+              <p>Setup, execution, outputs, and checks for specific runs.</p>
+            </article>
+            <article class="item">
+              <h3>Benchmarks</h3>
+              <p>Problem setup, hardware context, timings, and comparisons.</p>
+            </article>
+            <article class="item">
+              <h3>Technical notes</h3>
+              <p>Numerical methods, kernels, solvers, and validation details.</p>
+            </article>
+          </div>
         </div>
       </section>
 
-      <footer>
-        SFEM documentation is under active preparation.
-      </footer>
+      <section id="planned">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Planned content</h2>
+            <p>Initial pages will be added as examples become stable.</p>
+          </div>
+
+          <ol class="list">
+            <li>
+              <strong>Runs</strong>
+              <span>Mesh generation, operators, solvers, and post-processing.</span>
+            </li>
+            <li>
+              <strong>Results</strong>
+              <span>Benchmark cases with inputs, outputs, and summary tables.</span>
+            </li>
+            <li>
+              <strong>Notes</strong>
+              <span>Short technical explanations tied to concrete examples.</span>
+            </li>
+          </ol>
+        </div>
+      </section>
     </main>
+
+    <footer>
+      <div class="shell">SFEM documentation is under preparation.</div>
+    </footer>
+
   </body>
 </html>

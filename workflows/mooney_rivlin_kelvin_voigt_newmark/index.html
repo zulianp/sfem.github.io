@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mooney-Rivlin Kelvin-Voigt Newmark Validation</title>
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["$$", "$$"]] },
+        svg: { fontCache: "global" }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({ startOnLoad: true, theme: "neutral" });
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #18212f;
+        --muted: #596679;
+        --line: #d7dee8;
+        --accent: #0b6bcb;
+        --accent-soft: #e8f2ff;
+        --surface: #f7f9fc;
+        --white: #ffffff;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--surface);
+      }
+
+      main {
+        width: min(1040px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 56px 0 64px;
+      }
+
+      .eyebrow {
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 760;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 900px;
+        margin: 10px 0 16px;
+        font-size: clamp(36px, 6vw, 64px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 48px 0 14px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        font-size: 25px;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin: 30px 0 10px;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      p, li {
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.68;
+      }
+
+      p {
+        max-width: 860px;
+        margin: 0 0 14px;
+      }
+
+      ul {
+        margin: 8px 0 18px;
+        padding-left: 22px;
+      }
+
+      strong { color: var(--ink); }
+
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      code {
+        padding: 0.12rem 0.28rem;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        color: var(--ink);
+        background: var(--white);
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow: auto;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+      }
+
+      pre code {
+        padding: 0;
+        border: 0;
+        background: transparent;
+      }
+
+      img {
+        display: block;
+        width: min(100%, 820px);
+        height: auto;
+        margin: 16px 0 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+      }
+
+      .math-block {
+        overflow-x: auto;
+        margin: 14px 0 18px;
+        padding: 12px 16px;
+        border-left: 4px solid var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .mermaid {
+        width: min(100%, 820px);
+        margin: 18px 0 22px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--white);
+      }
+
+      @media (max-width: 760px) {
+        main {
+          width: min(100% - 28px, 1040px);
+          padding-top: 36px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="eyebrow">SFEM workflow validation</span>
+<h1 id="mooney-rivlin-kelvin-voigt-newmark">Mooney-Rivlin Kelvin-Voigt Newmark</h1>
+<p>This page documents the validation setup for the generated finite-strain operator <code>GeneratedMooneyRivlinKelvinVoigtNewmark</code>. The material is a compressible Mooney-Rivlin solid with a fully implicit finite-strain Kelvin-Voigt viscous stress, integrated in time with Newmark.</p>
+<h2 id="material-operator">Material Operator</h2>
+<p>The displacement is \(u(X,t)\), with deformation gradient</p>
+<div class="math-block">$$
+F = I + \nabla_X u, \qquad J = \det F .
+$$</div>
+<p>The elastic energy density used by the generated operator is</p>
+<div class="math-block">$$
+\psi_e(F)
+=
+\mu\left(I_1 - d + I_2 - \frac{d(d-1)}{2}\right)
++ \frac{\lambda}{2}(J-1)^2 ,
+$$</div>
+<p>where \(I_1 = \operatorname{tr}(C)\), \(I_2 = \frac{1}{2}(I_1^2-\operatorname{tr}(C^2))\), and \(C=F^T F\).</p>
+<p>The viscous first Piola stress is</p>
+<div class="math-block">$$
+P_v
+=
+J\left(2\eta_s\operatorname{dev}D+\eta_b\operatorname{tr}(D)I\right)F^{-T},
+\qquad
+D=\frac{1}{2}(L+L^T),
+\qquad
+L=\dot F F^{-1}.
+$$</div>
+<p>For Newmark, the generated operator receives a velocity-shift field \(z\) through the <code>previous</code> field:</p>
+<div class="math-block">$$
+\dot F
+=
+\alpha_v\nabla_X u+\nabla_X z,
+\qquad
+\alpha_v = \frac{\gamma}{\beta\Delta t}.
+$$</div>
+<h2 id="geometry-and-time-update">Geometry and Time Update</h2>
+<p>The dynamic problem solved by the driver is</p>
+<div class="math-block">$$
+M a_{n+1} + R_e(u_{n+1}) + R_v(u_{n+1}, z_n) = f_{n+1},
+$$</div>
+<p>with Newmark predictor</p>
+<div class="math-block">$$
+\hat u = u_n+\Delta t\,v_n+\Delta t^2\left(\frac{1}{2}-\beta\right)a_n,
+$$</div>
+<p>and acceleration reconstruction</p>
+<div class="math-block">$$
+a_{n+1} = \alpha_a(u_{n+1}-\hat u),
+\qquad
+\alpha_a = \frac{1}{\beta\Delta t^2}.
+$$</div>
+<p>The velocity shift used by the viscous operator is</p>
+<div class="math-block">$$
+z_n
+=
+v_n+\Delta t(1-\gamma)a_n-\alpha_v\hat u.
+$$</div>
+<div class="mermaid">
+flowchart LR
+  mesh["3D brick mesh<br/>HEX8 or HEX27"] --> state["Newmark state<br/>u_n, v_n, a_n"]
+  state --> predictor["predictor<br/>uhat, z_n"]
+  predictor --> nonlinear["Newton solve for<br/>u_{n+1}"]
+  nonlinear --> material["MR elastic residual<br/>KV viscous residual"]
+  nonlinear --> inertia["lumped inertia residual"]
+  material --> update["update<br/>v_{n+1}, a_{n+1}"]
+  inertia --> update
+</div>
+<h2 id="validation-1-homogeneous-finite-strain-patch">Validation 1: Homogeneous Finite-Strain Patch</h2>
+<p>The first validation imposes an affine displacement field</p>
+<div class="math-block">$$
+u(X)=A X,
+\qquad
+\dot F = B,
+$$</div>
+<p>where \(A\) and \(B\) are constant matrices. Therefore \(F\), \(D\), \(P_e\), and \(P_v\) are constant in the body, so the internal force must satisfy</p>
+<div class="math-block">$$
+\operatorname{Div}_X(P_e+P_v)=0.
+$$</div>
+<p>The test checks that all interior nodal residuals are zero to roundoff while boundary nodes retain the expected reactions.</p>
+<div class="mermaid">
+flowchart LR
+  reference["reference cube<br/>X in Omega_0"] --> affine["affine map<br/>x = X + A X"]
+  affine --> deformed["homogeneous deformation<br/>F = I + A"]
+  rate["constant rate<br/>Fdot = B"] --> viscous["constant D<br/>constant P_v"]
+  deformed --> stress["constant P_e + P_v"]
+  viscous --> stress
+  stress --> balance["Div_X(P_e + P_v) = 0<br/>interior residual = 0"]
+</div>
+<p><img src="assets/validation/homogeneous_residuals.svg" alt="Homogeneous finite-strain residual validation" /></p>
+<h2 id="validation-2-linearized-damped-shear-oscillator">Validation 2: Linearized Damped Shear Oscillator</h2>
+<p>The second validation uses a small-amplitude shear mode on a prismatic brick:</p>
+<div class="math-block">$$
+u(X,t) = q(t)\,\phi(X),
+\qquad
+\phi(X)=\sin\left(\frac{\pi X_1}{L}\right)e_2 .
+$$</div>
+<div class="mermaid">
+flowchart LR
+  x0["X_1 = 0<br/>phi = 0"] --- mid["0 < X_1 < L<br/>transverse shear mode<br/>u_2 = q(t) sin(pi X_1/L)"] --- xL["X_1 = L<br/>phi = 0"]
+  mid --> ode["project FE residual onto phi<br/>m qddot + c qdot + k q = 0"]
+  ode --> exact["closed-form underdamped<br/>analytical q(t)"]
+</div>
+<p>For the selected Mooney-Rivlin energy, the small-strain shear modulus is \(4\mu\). The modal equation is</p>
+<div class="math-block">$$
+m\ddot q + c\dot q + kq = 0,
+$$</div>
+<p>with continuum coefficients</p>
+<div class="math-block">$$
+m = \frac{\rho A L}{2},
+\qquad
+k = \frac{4\mu A\pi^2}{2L},
+\qquad
+c = \frac{\eta_s A\pi^2}{2L}.
+$$</div>
+<p>For the underdamped case, the analytical solution is</p>
+<div class="math-block">$$
+q(t)
+=
+e^{-\delta t}
+\left[
+q_0\cos(\omega_d t)
++ \frac{v_0+\delta q_0}{\omega_d}\sin(\omega_d t)
+\right],
+$$</div>
+<p>where</p>
+<div class="math-block">$$
+\omega_0=\sqrt{\frac{k}{m}},
+\qquad
+\delta=\frac{c}{2m},
+\qquad
+\omega_d=\sqrt{\omega_0^2-\delta^2}.
+$$</div>
+<p><img src="assets/validation/oscillator_response.svg" alt="Damped shear oscillator response" /></p>
+<p><img src="assets/validation/oscillator_error.svg" alt="Damped shear oscillator pointwise error" /></p>
+<h2 id="reproducing-the-csv-and-plots">Reproducing the CSV and Plots</h2>
+<p>From the SFEM source repository, build the two validation targets and run:</p>
+<pre><code class="language-bash">PYTHONPATH=python venv/bin/python workflows/mooney_rivlin_kelvin_voigt_newmark/generate_validation_csv_and_plots.py</code></pre>
+<p>This writes:</p>
+<ul>
+<li><code>homogeneous_residuals.csv</code></li>
+<li><code>oscillator_metrics.csv</code></li>
+<li><code>oscillator_samples.csv</code></li>
+<li><code>homogeneous_residuals.svg</code></li>
+<li><code>oscillator_response.svg</code></li>
+<li><code>oscillator_error.svg</code></li>
+</ul>
+<p>By default the files are written to <code>workflows/mooney_rivlin_kelvin_voigt_newmark/validation</code>.</p>
+    </main>
+  </body>
+</html>
