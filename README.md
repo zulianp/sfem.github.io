@@ -2,6 +2,10 @@
 
 This repository hosts the public documentation landing page for SFEM.
 
+Documentation site:
+
+https://sfem.github.io/
+
 The site is currently a small work-in-progress welcome page. Future content can
 be added here to document installation, usage examples, workflows, benchmarks,
 and development notes.
